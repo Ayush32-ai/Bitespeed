@@ -15,7 +15,7 @@ RUN npm install --no-audit --no-fund
 COPY src ./src
 
 # Generate Prisma client
-RUN npm run prisma:generate
+RUN npm run prisma:generate || npx prisma generate
 
 # Production stage
 FROM node:20-alpine
@@ -35,6 +35,11 @@ COPY --from=base /app/src ./src
 # Copy entrypoint script
 COPY docker-entrypoint.sh ./
 RUN chmod +x ./docker-entrypoint.sh
+
+# Set default environment variables
+ENV DATABASE_URL="file:./dev.db"
+ENV PORT=3000
+ENV NODE_ENV=production
 
 # Expose port
 EXPOSE 3000

@@ -167,11 +167,120 @@ curl -X POST http://localhost:3000/identify \
 ## Hosting
 
 This application can be hosted on services like:
-- Render (free tier available)
-- Heroku
-- Railway
+- **Render.com** (recommended - free tier available)
+- Railway.app
 - Vercel (with serverless functions)
+- Heroku (paid tier)
 - AWS Lambda
+
+### ✅ Deploy on Render.com (Recommended)
+
+1. **Push to GitHub:**
+   ```bash
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
+   ```
+
+2. **Create Render Account:**
+   - Go to [render.com](https://render.com)
+   - Sign up with GitHub
+
+3. **Create New Web Service:**
+   - Click "New +"
+   - Select "Web Service"
+   - Connect your GitHub repository
+   - Select the Bitespeed repo
+
+4. **Configure Service:**
+   - **Name:** bitespeed-identity (or your choice)
+   - **Environment:** Docker
+   - **Start Command:** Leave empty (uses Dockerfile)
+   - **Region:** Choose closest to you
+
+5. **Add Environment Variables:**
+   Click "Add Environment Variable" and add:
+   ```
+   DATABASE_URL = file:./dev.db
+   PORT = 3000
+   NODE_ENV = production
+   ```
+
+6. **Deploy:**
+   - Click "Create Web Service"
+   - Wait for deployment (2-5 minutes)
+   - Your API will be at: `https://bitespeed-identity.onrender.com/identify`
+
+### Deploy on Railway.app
+
+1. **Push to GitHub** (same as above)
+
+2. **Connect to Railway:**
+   - Go to [railway.app](https://railway.app)
+   - Sign in with GitHub
+   - Click "New Project"
+   - Select "Deploy from GitHub repo"
+
+3. **Configure:**
+   - Select your Bitespeed repository
+   - Railway auto-detects the Dockerfile
+   - Add environment variables:
+     ```
+     DATABASE_URL = file:./dev.db
+     PORT = 3000
+     ```
+
+4. **Deploy:**
+   - Railway deploys automatically
+   - Check the "Deployments" tab for your live URL
+
+### ⚠️ Important: Database Persistence
+
+**SQLite Limitation:**
+- SQLite stores data in a file (`dev.db`)
+- Free services have **ephemeral filesystems** - databases reset on restart
+- **Recommended:** Use PostgreSQL for production
+
+### 🚀 Use PostgreSQL (Recommended)
+
+1. **Create Free PostgreSQL Database:**
+   - Option A: [ElephantSQL](https://www.elephantsql.com) (Free tier with free databases)
+   - Option B: Railway PostgreSQL add-on
+   - Option C: Render PostgreSQL
+
+2. **Update `prisma/schema.prisma`:**
+   ```prisma
+   datasource db {
+     provider = "postgresql"
+     url      = env("DATABASE_URL")
+   }
+   ```
+
+3. **Set Environment Variable:**
+   In your hosting service, set:
+   ```
+   DATABASE_URL = postgresql://user:password@host:port/database
+   ```
+
+4. **Run Migrations:**
+   ```bash
+   npx prisma migrate db push
+   ```
+
+5. **Deploy:**
+   - Push to GitHub
+   - Service will auto-deploy
+
+### Environment Variables Reference
+
+**Required:**
+- `DATABASE_URL` - Database connection string
+  - SQLite: `file:./dev.db`
+  - PostgreSQL: `postgresql://user:password@host:port/database`
+
+**Optional:**
+- `PORT` - Server port (default: 3000)
+- `NODE_ENV` - Environment mode (development/production)
 
 ## License
 
